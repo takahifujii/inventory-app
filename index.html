@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>在庫アプリPWA</title>
+
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#4F46E5">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles.css">
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+</head>
+
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-text">読み込み中...</div>
+    </div>
+
+    <div class="app-container">
+        <header class="app-header glassmorphism">
+            <h1 class="app-title">在庫管理</h1>
+            <button class="icon-button" id="btn-sync"><span class="material-symbols-outlined">sync</span></button>
+        </header>
+
+        <main class="main-content">
+
+            <!-- ==============================
+           VIEW: 在庫一覧
+      =============================== -->
+            <section id="view-list" class="view active">
+                <div class="search-filter-section">
+                    <div class="search-bar">
+                        <span class="material-symbols-outlined">search</span>
+                        <input type="text" id="search-input" placeholder="品目名で検索">
+                    </div>
+
+                    <div class="filter-row">
+                        <select id="filter-category" class="filter-select">
+                            <option value="">全カテゴリ</option>
+                        </select>
+                        <select id="filter-location" class="filter-select">
+                            <option value="">全保管場所</option>
+                        </select>
+                        <select id="sort-select" class="filter-select">
+                            <option value="updated_desc">更新日 (新→旧)</option>
+                            <option value="qty_asc">在庫数 (少→多)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="inventory-list" class="inventory-list">
+                    <!-- Item Cards will be injected here -->
+                </div>
+            </section>
+
+            <!-- ==============================
+           VIEW: 新規登録
+      =============================== -->
+            <section id="view-add" class="view">
+                <form id="add-form" class="form-container">
+                    <h2>在庫の新規登録 / 追加</h2>
+
+                    <div class="form-group">
+                        <label>写真撮影・選択</label>
+                        <div class="photo-upload-area" id="photo-upload-area">
+                            <span class="material-symbols-outlined photo-icon">add_a_photo</span>
+                            <p>タップして画像を追加</p>
+                            <img id="photo-preview" class="photo-preview hidden" alt="プレビュー">
+                        </div>
+                        <input type="file" id="photo-input" accept="image/*" class="hidden">
+                        <button type="button" id="btn-clear-photo" class="clear-photo-btn hidden">写真を削除</button>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add-name">品目名 <span class="required">*</span></label>
+                        <input type="text" id="add-name" required placeholder="例: アプリコット ウォシュレット">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add-category">カテゴリ <span class="required">*</span></label>
+                        <div class="flex-input">
+                            <select id="add-category" required></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add-location">保管場所 <span class="required">*</span></label>
+                        <div class="flex-input">
+                            <select id="add-location" required></select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col">
+                            <label for="add-qty">数量 <span class="required">*</span></label>
+                            <input type="number" id="add-qty" min="0" value="1" required>
+                        </div>
+                        <div class="col">
+                            <label for="add-unit">単位</label>
+                            <input type="text" id="add-unit" value="個" placeholder="個, 台, 箱など">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add-strategy">同名品目がある場合</label>
+                        <select id="add-strategy">
+                            <option value="add">既存の在庫に加算する（推奨）</option>
+                            <option value="create">別ロットとして新しく追加する</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="add-note">メモ (任意)</label>
+                        <textarea id="add-note" rows="2" placeholder="仕入日や特記事項など"></textarea>
+                    </div>
+
+                    <button type="submit" class="primary-btn btn-large glassmorphism">
+                        <span class="material-symbols-outlined">save</span>
+                        登録する
+                    </button>
+                </form>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav glassmorphism">
+            <button class="nav-item active" data-target="view-list">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span class="nav-label">在庫一覧</span>
+            </button>
+            <button class="nav-item fab-center" data-target="view-add">
+                <div class="fab">
+                    <span class="material-symbols-outlined">add</span>
+                </div>
+            </button>
+            <button class="nav-item" data-target="view-settings">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="nav-label">設定</span>
+            </button>
+        </nav>
+    </div>
+
+
+    <!-- ==============================
+       MODALS
+  =============================== -->
+    <!-- 消費（使用）モーダル -->
+    <div id="consume-modal" class="modal-overlay hidden">
+        <div class="modal-content glassmorphism">
+            <h3>在庫を使用する</h3>
+            <p id="consume-item-name" class="modal-item-name">-</p>
+            <div class="current-stock">現在の在庫: <span id="consume-current-qty"></span></div>
+
+            <div class="form-group">
+                <label>使用数</label>
+                <div class="qty-stepper">
+                    <button type="button" id="btn-consume-minus" class="stepper-btn">-</button>
+                    <input type="number" id="consume-qty" value="1" min="1">
+                    <button type="button" id="btn-consume-plus" class="stepper-btn">+</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>メモ (任意)</label>
+                <input type="text" id="consume-note" placeholder="使用した現場名など">
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-consume-cancel" class="cancel-btn">キャンセル</button>
+                <button id="btn-consume-submit" class="primary-btn confirm-consume">使用を記録</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js');
+            });
+        }
+    </script>
+</body>
+
+</html>
